@@ -50,13 +50,15 @@ Soyez indulgent, ce tuto est vraiment posé à l'arrache avec des vérifications
     * [InfluxDB](#influxdb)
         * [Installation](#installer-la-bdd)
         * [Configuration](#configuration-de-influxdb)
+<!--
+Menu désactivé car relecture en cours
     * [Telegraf](#telegraf)
         * [Installation](#installation-de-telegraf)
         * [Configuration](#configuration-de-telegraf)
     * [Grafana](#grafana)
         * [Installation](#installation-de-grafana)
         * [Configuration](#configuration-de-grafana)
-
+-->
 ----
 
 
@@ -729,6 +731,8 @@ Le système de tag/série va nous permettre de filtrer très rapidement les vale
 J'ai mis en place ma domotique il y a déjà quelques années et en rédigeant ce tuto depuis zéro, je découvre une interface Web de InfluxDB 2.x vraiment magifique avec des exemples de configuration pour les sondes, des bouts de scripts, un exploreur de BDD,... (à l'époque il n'y avait qu'un point d'accès API).  
 Bref grosse surprise et je vais essayer d'orienter la suite du tuto sur cette interface car je sais que certains sont moins à l'aise avec la ligne de commande cependant une ligne de commande change moins dans le temps qu'une interface graphique donc j'espère que le tuto ne deviendra pas obsolète rapidement (un simple remaniement des menus peut vite changer la totalité du tuto).
 
+Edit : La version 2.x propose énormément de chose mais elle est plus complexe à prendre en main, cependant elle permet d'ancienne option que nous utiliserons.
+
 
 #### Installer la BDD
 
@@ -775,6 +779,10 @@ Il est très important de noter ce token (voir même plus que le mot de passe ad
 
 <img src="img/influxdb-token.png" alt="Token InfluxDB" heigth="100" />
 
+
+La suite du tuto est en cours de relecture/ré-écriture car il manque des informations pour la mise en place des comptes d'accès.
+
+<!--
 
 Avec ce token nous allons créer 2 comptes avec les droits qui vont bien en CLI (bien entendu, remplacez `<TOKEN_API>` par votre token récupéré à l'étape précédente) :
 ```bash
@@ -911,6 +919,7 @@ Le login/mdp par défaut est `admin`/`admin` et avant même la première connexi
 
 Rédaction en cours...
 
+-->
 ---------
 
 **ATTENTION : Ce tuto n'est pas complet et la suite est en cours de rédaction, revenez plus tard pour lire la suite !!!**
@@ -921,12 +930,15 @@ Rédaction en cours...
 
 
 * [ ] Graph :
+    * [ ] Telegraf :
+        * [ ] Installation (désactivé car relecture)
+        * [ ] Configuration avec un token (en cours)
     * [ ] InfluxDB :
-        * [X] Installation
+        * [ ] Installation (désactivé car relecture)
         * [ ] Configuration (en cours: pas fini car il manque des infos)
     * [ ] Grafana :
-        * [X] Installation
-        * [ ] Configuration (en cours de rédaction)
+        * [ ] Installation (désactivé car relecture)
+        * [ ] Configuration (en cours de rédaction/vérification)
         * [ ] Graph
 * [ ] Plus loin :
     * [ ] Domoticz
@@ -959,3 +971,8 @@ Rédaction en cours...
         * [ ] Standard
         * [ ] Pro
     * [ ] Refaire sommaire après splittage
+
+<!--
+influx v1 auth create --username domotique_ro --o domotique --token XXXXX --read-bucket e98fe197dec38b6a
+
+-->
