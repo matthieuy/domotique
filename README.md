@@ -50,15 +50,12 @@ Soyez indulgent, ce tuto est vraiment posé à l'arrache avec des vérifications
     * [InfluxDB](#influxdb)
         * [Installation](#installer-la-bdd)
         * [Configuration](#configuration-de-influxdb)
-<!--
-Menu désactivé car relecture en cours
     * [Telegraf](#telegraf)
         * [Installation](#installation-de-telegraf)
         * [Configuration](#configuration-de-telegraf)
     * [Grafana](#grafana)
         * [Installation](#installation-de-grafana)
         * [Configuration](#configuration-de-grafana)
--->
 ----
 
 
@@ -94,7 +91,7 @@ Il sera nécessaire d'avoir quelques connaissances de bases sous Linux :
 NB : Je ne détaillerai pas l'installation de l'OS GNU/Linux (Debian) sur le nano-ordinateur, je pars du principe qu'elle est déjà faite et configurée (configuration Wifi + accessible en SSH).  
 Au moment où j'écris ces lignes, la préparation de la carte microSD a été faite avec :
 * [Raspberry Imager (rpi-imager)](https://www.raspberrypi.com/software/) : v1.7.5
-* Debian/Raspbian : Bulleyes / v11.7 (la version Bookworm / v12.0 est sortie dernièrement mais non testée pour le moment).
+* Debian/Raspbian : Bulleyes / v11.7 en version 64bits Lite (sans environnement graphique car inutile). La version Bookworm / v12.0 est sortie dernièrement mais non testée pour le moment.
 
 
 ### Des sondes Zigbee
@@ -457,7 +454,7 @@ sudo apt dist-upgrade
 
 Nous allons installer un serveur MQTT nommé `mosquitto` :
 ```bash
-sudo apt install mosquitto
+sudo apt install -y mosquitto
 ```
 
 Nous allons créer 2 comptes avec des mdp différents sur ce serveur MQTT : un en lecture seule (ro) et l'autre en écriture (rw). A chaque commande un mdp sera demandé 2 fois.  
@@ -750,18 +747,19 @@ wget -q https://repos.influxdata.com/influxdata-archive_compat.key
 echo '393e8779c89ac8d958f81f942f9ad7fb82a25e133faddaf92e15b16e6ac9ce4c influxdata-archive_compat.key' | sha256sum -c && cat influxdata-archive_compat.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg > /dev/null
 echo 'deb [signed-by=/etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg] https://repos.influxdata.com/debian stable main' | sudo tee /etc/apt/sources.list.d/influxdata.list
 
-sudo apt-get update && sudo apt-get install influxdb2
+sudo apt-get update && sudo apt-get install -y influxdb2
+sudo systemctl restart influxdb
 ```
 
 Nous pouvons vérifier que la base de donnée (non configurée pour le moment) tourne bien avec la commande suivante :  
-```
+```bash
 influx ping
 ```
 
 #### Configuration de InfluxDB
 
 Il est possible de faire la configuration de base en CLI (ligne de commande) mais comme une interface graphique très complète est disponible sur les dernières versions, nous allons l'utiliser.  
-Cette dernière est accessible via un navigateur Web en HTTP sur le port `8086`. [http://rpi:8086](http://rpi:8086). Remplacez `rpi` par l'adresse IP du Raspberry où est installé InfluxDB si nécessaire.
+Cette dernière est accessible via un navigateur Web en HTTP sur le port `8086`. [http://raspberrypi:8086](http://raspberryrpi:8086) (remplacez `raspberryrpi` par l'adresse IP du Raspberry où est installé InfluxDB si nécessaire).
 
 <img src="img/influxdb-init.png" alt="Interface Web InfluxDB" heigth="100" />
 
@@ -774,30 +772,45 @@ Voici comment j'ai rempli ce formulaire :
 * Organization : `domotique`
 * Bucket : `domotique`
 
-Après avoir validé avec le bouton "`Continuer`", nous arrivons sur une page avec un token.  
+Après avoir validé avec le bouton "`Continuer`", nous arrivons sur une page avec le token admin.  
 Il est très important de noter ce token (voir même plus que le mot de passe admin) car il est généré et affiché sur cette page puis haché donc plus du tout accessible de manière lisible par la suite !!!
 
 <img src="img/influxdb-token.png" alt="Token InfluxDB" heigth="100" />
 
+Une fois fait, vous pouvez continuer avec "Configure later".
 
-La suite du tuto est en cours de relecture/ré-écriture car il manque des informations pour la mise en place des comptes d'accès.
+Nous allons créer 2 autres tokens (notez les bien à chaque fois) :
+* Dans le menu à gauche : `Load data` => `API Tokens`
+* Sur le bouton à droite : `Generate API Token` => `Custom API Token`
+* 1er compte : 
+    * Description : `domotique_ro`
+    * Bucket : `domotique` (en read)
+    * Telegraf : `aucun`
+    * Other ressource : `aucun`
+* 2eme compte :
+    * Description : `domotique_rw`
+    * Bucket : `domotique` (en read+write)
+    * Telegraf : `aucun`
+    * Other ressource : `aucun`
 
-<!--
+A ce stade, nous avons 3 tokens :
+* `admin` : qui servira pour la gestion complète d'influxDB
+* `domotique_ro` : un token en lecture seule qui lira les données uniquement
+* `domotique_rw` : un token en lecture/écriture pour le collecteur
 
-Avec ce token nous allons créer 2 comptes avec les droits qui vont bien en CLI (bien entendu, remplacez `<TOKEN_API>` par votre token récupéré à l'étape précédente) :
+Pour la suite du tuto, il est nécessaire de récupérer l'ID du bucket.  
+Vous pouvez le récupérer dans "`Load data`" => "`Buckets`" :
+
+<img src="img/influxdb-bucketid.png" alt="ID du bucket InfluxDB" />
+
+Le système de token est spécifique à la nouvelle version d'influxDB mais pour une prise en main plus rapide (de l'outil de graph), nous allons aussi créer un compte en lecture seule "legacy" (c'est à dire pour l'ancienne version) :
 ```bash
-influx user create --token <TOKEN_API> -o domotique -n domotique_ro
-influx user create --token <TOKEN_API> -o domotique -n domotique_rw
+influx v1 auth create --username domotique_ro -o domotique --token <TOKEN_ADMIN> --read-bucket <ID_BUCKET>
 ```
-
-Nous changeons les mots de passe avec un générateur (une fois de plus bien les noter dans un gestionnaire de mdp) :
-```bash
-influx user password --token <TOKEN_API> -n domotique_ro
-influx user password --token <TOKEN_API> -n domotique_rw
-```
-
-Nous utiliserons le compte `rw` pour écrire dans la base de donnée avec notre collecteur MQTT (pas encore installé) et le compte en lecture seule `ro` pour l'affichage des graphs (pas installé non plus).
-
+Bien entendu, remplacez les variables suivantes dans cette commande :
+* `<TOKEN_ADMIN>` : par le 1er token admin car c'est le seul qui a les droits pour gérer les créations de compte
+* `<ID_BUCKET>` : par l'ID du bucket domotique récupéré juste avant (pour donner les droits de lecture à ce compte)  
+Un mot de passe est demandé pour ce compte "legacy" (utilisez un générateur et noté le bien).
 
 
 ### Telegraf
@@ -812,8 +825,9 @@ C'est un outil très complet composé de 2 types de configuration :
 
 L'installation est très simple si vous avez suivi la procédure d'installation d'InfluxDB (sinon il faut à minima faire toute la partie d'ajout des dépôts) :
 ```bash
-sudo apt-get install telegraf 
+sudo apt-get install -y telegraf 
 ```
+
 
 #### Configuration de Telegraf
 
@@ -828,7 +842,7 @@ Créons un nouveau fichier `/etc/telegraf/telegraf.d/output.conf` avec le conten
     urls = ["http://127.0.0.1:8086"]
 
     # Token d'authentification
-    token = "METTEZ ICI VOTRE TOKEN INFLUXDB"
+    token = "METTEZ ICI VOTRE TOKEN INFLUXDB DU COMPTE EN LECTURE/ECRITURE domotique_rw"
 
     # Nom de l'organisation
     organization = "domotique"
@@ -847,7 +861,7 @@ sudo service telegraf restart
 
 Quand j'ai dit qu'il n'y avait aucun module "input" d'activé par défaut, ce n'est pas tout à fait vrai, il y a des modules par défaut qui contrôle ce qu'il y a sur l'équipement (le raspberry) qui contient telegraf. Nous retrouvons des informations sur le CPU, la mémoire, l'espace disque, l'utilisation du disque (lecture/écriture),...
 
-Après quelques minutes nous pouvons déjà le vérifier sur l'interface Web d'InfluxDB (http://IP_DU_RASPBERRY:8086) dans la section "`Data Explorer`" en lançant une recherche comme ceci (à adapter) puis en cliquant sur "`Submit`" (complètement à droite) :  
+Après quelques minutes nous pouvons déjà le vérifier sur l'interface Web d'InfluxDB ([http://raspberrypi:8086](http://raspberrypi:8086)) dans la section "`Data Explorer`" en lançant une recherche comme ceci (à adapter) puis en cliquant sur "`Submit`" (complètement à droite) :  
 <img src="img/influxdb-query.png" alt="Requête InfluxDB" />
 
 Ceci devrait nous sortir un graph avec le nombre de processus qui tournent sur le Raspberry PI qui héberge telegraf.  
@@ -897,6 +911,7 @@ Dans mon cas, nous voyons bien qu'il y a des valeurs remontées par la sonde de 
 Nous attaquons la grosse partie où nous allons enfin pouvoir générer des graphs.  
 La version installée lors de l'écriture de ces lignes est la v10.0.3.
 
+
 #### Installation de Grafana
 
 L'installation va être rapide, il suffit de copier ce bloc de lignes dans une console SSH du RaspberryPI :
@@ -905,21 +920,27 @@ sudo apt-get install -y apt-transport-https software-properties-common wget
 sudo wget -q -O /usr/share/keyrings/grafana.key https://apt.grafana.com/gpg.key
 echo "deb [signed-by=/usr/share/keyrings/grafana.key] https://apt.grafana.com stable main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
 sudo apt-get update
-sudo apt-get install grafana
+sudo apt-get install -y grafana
 sudo systemctl daemon-reload
 sudo systemctl start grafana-server
 sudo systemctl status grafana-server
 ```
 
-Grafana écoute sur le port 3000 par défaut, vous pouvez vous rendre dès maintenant sur l'interface Web : [http://[IP_DU_RASPBERRY]:3000](http://rpi:3000).  
+Grafana écoute sur le port 3000 par défaut, vous pouvez vous rendre dès maintenant sur l'interface Web : [http://raspberrypi:3000](http://raspberrypi:3000).  
 Le login/mdp par défaut est `admin`/`admin` et avant même la première connexion, il vous est demandé de modifier ce mot de passe.
 
 
 #### Configuration de Grafana
 
-Rédaction en cours...
+Nous allons commencer par configurer 2 bases de données en source. Pourquoi 2 alors que nous avons qu'une base de donnée ?
+* Notre base de donnée avec le compte legacy car plus simple pour débuter.
+* La même base de donnée mais avec "Flux" un langage beaucoup plus puissant mais complexe.
 
--->
+Ceci va nous permettre de gérer/grapher les mêmes données mais de manière différente.
+
+**Rédaction de la suite en cours...**
+
+
 ---------
 
 **ATTENTION : Ce tuto n'est pas complet et la suite est en cours de rédaction, revenez plus tard pour lire la suite !!!**
@@ -930,18 +951,17 @@ Rédaction en cours...
 
 
 * [ ] Graph :
-    * [ ] Telegraf :
-        * [ ] Installation (désactivé car relecture)
-        * [ ] Configuration avec un token (en cours)
+    * [X] Telegraf :
+        * [X] Installation
+        * [X] Configuration avec un token RO
     * [ ] InfluxDB :
-        * [ ] Installation (désactivé car relecture)
+        * [X] Installation
         * [ ] Configuration (en cours: pas fini car il manque des infos)
     * [ ] Grafana :
-        * [ ] Installation (désactivé car relecture)
+        * [X] Installation
         * [ ] Configuration (en cours de rédaction/vérification)
         * [ ] Graph
 * [ ] Plus loin :
-    * [ ] Domoticz
     * [ ] Prise wattmetre connectée :
         * [ ] Calibrage wattmetre
     * [ ] Envoyer des commandes via MQTT :
@@ -949,6 +969,7 @@ Rédaction en cours...
         * [ ] Permit join
         * [ ] Switch prise
     * [ ] Node-Red
+    * [ ] Domoticz
     * [ ] Sécurité :
         * [ ] Tasmota : TLS pas possible
         * [ ] MQTT over TLS
