@@ -55,6 +55,7 @@ Soyez indulgent, ce tuto est vraiment posé à l'arrache avec des vérifications
         * [Configuration](#configuration-de-telegraf)
     * [Grafana](#grafana)
         * [Installation](#installation-de-grafana)
+        * [Configuration](#configuration-de-grafana)
 
 ----
 
@@ -885,11 +886,30 @@ Dans mon cas, nous voyons bien qu'il y a des valeurs remontées par la sonde de 
 
 ### Grafana
 
-Nous attaquons la grosse partie où nous allons enfin pouvoir générer des graphs.
+Nous attaquons la grosse partie où nous allons enfin pouvoir générer des graphs.  
+La version installée lors de l'écriture de ces lignes est la v10.0.3.
 
 #### Installation de Grafana
 
-*En cours de rédaction*
+L'installation va être rapide, il suffit de copier ce bloc de lignes dans une console SSH du RaspberryPI :
+```bash
+sudo apt-get install -y apt-transport-https software-properties-common wget
+sudo wget -q -O /usr/share/keyrings/grafana.key https://apt.grafana.com/gpg.key
+echo "deb [signed-by=/usr/share/keyrings/grafana.key] https://apt.grafana.com stable main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
+sudo apt-get update
+sudo apt-get install grafana
+sudo systemctl daemon-reload
+sudo systemctl start grafana-server
+sudo systemctl status grafana-server
+```
+
+Grafana écoute sur le port 3000 par défaut, vous pouvez vous rendre dès maintenant sur l'interface Web : [http://[IP_DU_RASPBERRY]:3000](http://rpi:3000).  
+Le login/mdp par défaut est `admin`/`admin` et avant même la première connexion, il vous est demandé de modifier ce mot de passe.
+
+
+#### Configuration de Grafana
+
+Rédaction en cours...
 
 ---------
 
@@ -905,12 +925,12 @@ Nous attaquons la grosse partie où nous allons enfin pouvoir générer des grap
         * [X] Installation
         * [ ] Configuration (en cours: pas fini car il manque des infos)
     * [ ] Grafana :
-        * [ ] Installation (en cours de rédaction)
-        * [ ] Configuration
+        * [X] Installation
+        * [ ] Configuration (en cours de rédaction)
         * [ ] Graph
 * [ ] Plus loin :
     * [ ] Domoticz
-    * [ ] Prise wattmetre connecté :
+    * [ ] Prise wattmetre connectée :
         * [ ] Calibrage wattmetre
     * [ ] Envoyer des commandes via MQTT :
         * [ ] Client MQTT (python, cli,..)
