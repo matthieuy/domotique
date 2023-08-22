@@ -96,9 +96,9 @@ Au moment où j'écris ces lignes, la préparation de la carte microSD a été f
 
 ### Des sondes Zigbee
 
-Les sondes de température/humidité Zigbee utilisées sont les suivantes :
+Les sondes de température/humidité Zigbee (de marque SonOff) utilisées sont les suivantes :
 * `SNZB-02` : C'est ce que j'utilise en majorité, ce sont des petites sondes (4x4x1cm) à coller contre le mur (vu la taille et la couleur blanche, c'est assez discret).
-* `SNZB-02P` : Je n'en ai pas à titre perso (donc non testé) mais ça semble les mêmes que les SNZB-02 sauf qu'elles sont rondes au lieu d'être carré.
+* `SNZB-02P` : Je n'en ai pas à titre perso (donc non testé) mais ça semble les mêmes que les précédentes sauf qu'elles sont rondes au lieu d'être carré.
 * `SNZB-02D` : Sonde un peu plus grosse avec un petit affichage numérique (fournie avec une base autocollante pour la coller contre un mur ainsi qu'un petit pied intégré pour la poser par exemple sur une table de chevet). Le truc vachement bien foutu c'est que même si la base est collée sur un mur, nous pouvons détacher la sonde pour la mettre sur son pied intégré puis la remettre sur la base murale (sans décoller votre superbe papier peint à motif écossais). C'est idéal si vous souhaitez avoir un retour visuel sans allumer le PC ou comme moi pouvoir déplacer la sonde rapidement d'une pièce à une autre pour voir la température à un endroit précis de la pièce.
 
 Il faut compter environ 10€ pour une sonde mais le tarif est très très dégressif sur AliExpress lors d'achat par lot (exemple pour les SNZB-02 que j'utilise: 10€/pièce, 15€ pour 2 et 20€ pour 3,...) donc je vous conseil de bien réfléchir au nombre de sondes nécessaires avant de valider votre panier.  
@@ -108,23 +108,23 @@ Voici les différents types de sondes :
 <img src="img/SNZB-02P.png" alt="SNZB-02P" height="200"/>
 <img src="img/SNZB-02D.png" alt="SNZB-02D" height="200"/>
 
-Le Zigbee est un protocole sans-fil comme le wifi ou le bluetooth mais principalement utilisé pour la domotique car il consomme très peu d'énergie ! A titre d'info, je change la pile "montre" selon le signal (plus il est faible et plus sa consomme) environ tous les 6 mois pour les très faibles signals et plus d'un an pour les autres ceci pour les sondes sans écran comme la `SNZB-02` (je n'ai pas assez de recule pour les autres).  
+Le Zigbee est un protocole sans-fil comme le wifi ou le bluetooth mais principalement utilisé pour la domotique car il consomme très peu d'énergie ! A titre d'info, je change la pile "montre" selon le signal (plus il est faible et plus sa consomme) environ tous les 6 mois pour les très faibles signals et plus d'un an pour les autres ceci pour les sondes `SNZB-02` (sans écran car je n'ai pas assez de recule pour les autres).  
 NB : Je percute que certaines sondes ont plus de 2 ans avec toujours la même pile d'origine (mais le signal est fort car à quelques mètres de la centrale).
 
 
  ### Une centrale Zigbee/wifi
 
 Ce boitier, appellé passerelle ou bridge (j'utiliserai le terme bridge dans ce tuto), va permettre de récupérer les valeurs des sondes Zigbee et renvoyer ses informations sur le Wifi.  
-Par défaut, il est fourni avec un firmware qui communique sur le net sur AWS (Amazon) et le cloud chinois du constructeur SonOff. Nous verrons plus loin comment flasher ce boitier avec un firmware opensource qui communiquera uniquement en local.
+Par défaut, il est fourni avec un firmware qui communique sur le net sur AWS (Amazon) et le cloud chinois du constructeur SonOff. Nous verrons plus loin comment flasher ce boitier avec un firmware open-source qui communiquera uniquement en local.
 
-Le modéle utilisé dans ce tuto est un "*Sonoff ZB Bridge*" (dite version de base/standard) pour environ 10€.  
+Le modéle utilisé dans ce tuto est un "`Sonoff ZB Bridge`" (dite version de base/standard) pour environ 10€.  
 Il existe également en version Pro qui tourne sur un ESP-32 (plus puissant que le ESP8266) mais la version standard est largement suffisant pour une quinzaine de sondes. Il faut compter environ 20€ pour la version pro.  
 Ces 2 modèles seront abordés durant ce tuto (la version Pro est carrément plus galère à flasher mais plus simple à souder).  
 Si vous débutez en domotique et/ou n'êtes pas très à l'aise avec l'électronique et l'IoT (internet des objets), je conseil fortement le modèle standard plus simple à installer/configurer. La plus-value de la version pro est très faible pour les débutants car la portée sans-fil reste la même et à part si vous souhaitez installer plus de 32 sondes/équipements ou faire plus de règle conditionnelle de votre domotique je conseil la version "standard" (et même pour ce dernier point, je conseil de le faire avec d'autres outils comme Domoticz, Node-red,... car plus flexible et sans code).
 
 Comme il y a un module wifi dedans (consommateur d'énergie). Le bridge, à l'inverse des sondes (sur pile), doit être branché sur secteur via un câble micro-USB (5V 1A). Il est préférable de le placer au milieu de la maison/appartement pour réduire la consommation des sondes. Il faut également que ce boitier soit couvert en wifi (le même que votre raspberry PI).
 
-Voici le boitier (format et dimensions identiques pour la version standard ou pro) mais idem que les sondes, il est très discret (blanc de 6x6x1cm) :  
+Voici le boitier (le format et les dimensions sont identiques pour la version standard et pro) mais idem que les sondes, il est très discret (blanc de 6x6x1cm) :  
 <img src="img/ZBridge.png" alt="SNZB-02D" width="200"/>
 
 
@@ -182,7 +182,7 @@ Comme vu dans les pré-requis, le fonctionnement de base du boitier SonOff est p
 En faite le matériel Sonoff (ça concerne aussi les prises connectés, les interrupteurs, ...) sont basés sur un micro-controlleur nommé ESP8266 (pour la version standard) ou ESP-32 (pour la version pro) très connu des bidouilleurs DIY : c'est un arduino sous stéroïde car équipé de Wifi (voir du bluetooth pour le ESP-32) pour environ 5€/pièce.  
 Il est donc possible de flasher complètement ce composant de manière relativement simple.
 
-C'est ce que nous allons faire pour le remplacer par le firmware opensource [Tasmota](https://tasmota.github.io/docs/).
+C'est ce que nous allons faire pour le remplacer par le firmware open-source [Tasmota](https://tasmota.github.io/docs/).
 
 Il est nécessaire d'avoir :
 * Un fer à souder
@@ -300,14 +300,7 @@ La configuration de base va se limiter à ceci :
 Nous verrons la configuration plus poussée après.
 
 **ATTENTION** : Pour la version pro (uniquement), le flashage n'est pas du tout terminé car les images fournies sont (à l'heure où j'écris ces lignes) toujours en cours de dev !  
-En faite nous avons installer une version de base (factory), il reste plusieurs étapes :
-* Installer un module sur l'interface Web pour gérer les partitions
-* Faire une migration sur une partition safeboot
-* Redimenssionner la partition tasmota
-* Uploader les drivers manquants
-* Compiler les drivers directement sur l'ESP-32
-
-Pas de panique, la majorité des opérations va se faire via une interface Web.
+En faite nous avons installé une version de base (factory), il reste plusieurs étapes que nous verrons plus tard mais pas de panique, la majorité des opérations va se faire via une interface Web.
 
 
 
@@ -318,8 +311,11 @@ Pas de panique, la majorité des opérations va se faire via une interface Web.
 * Après quelques secondes vous devez voir un hotspot wifi non sécurisé du genre `tasmota_XXXXXX-####` (où `XXXXXX` est issue de l'adresse MAC du boitier et `####` un nombre random).
 . Connectez votre PC ou mobile sur ce hotspot.
 * Rendez-vous via votre navigateur sur l'adresse suivante : [http://192.168.4.1](http://192.168.4.1) (NB : selon votre réseau, votre navigateur, OS,... il est possible que vous soyez directement redirigé sur cette adresse).
-* Vous arrivez sur la page de configuration du Wifi. **Faites très attention à bien saisir le bon mot de passe Wifi car sinon il sera sans doute nécessaire de reflasher la board.**
+* Vous arrivez sur la page de configuration du Wifi.
 * Cliquez sur "`Save`"
+
+<img src="img/tasmota-hotspot-wifi.png" alt="Configuration du wifi" height="550" />
+
 
 Selon les navigateurs, OS, votre config réseau... vous êtes soit redirigé sur la nouvelle IP sinon il faut vous reconnecter sur votre Wifi perso et saisir la nouvelle IP du boitier dans votre navigateur. 
 
@@ -349,9 +345,11 @@ Une fois reconnecté sur l'interface Web du boitier, vous pouvez faire les actio
 Certaines actions nécessitent un reboot du boitier mais c'est très rapide (le plus long étant la reconnexion Wifi et le DHCP de votre réseau).
 
 Voici les modifications à faire dans le menu "`Configuration`" => "`Configuration Other`" :
-* Template selon votre modèle (en une ligne) : 
-    * Standard : `{"NAME":"Sonoff ZbBridge","GPIO":[56,165,0,166,215,0,0,0,6,158,5,0,17],"FLAG":0,"BASE":75}`
-    * Pro : `{"NAME":"Sonoff Zigbee Pro","GPIO":[0,0,576,0,480,0,0,0,0,1,1,5792,0,0,0,3552,0,320,5793,3584,0,640,608,32,0,0,0,0,0,1,0,0,0,0,0,0],"FLAG":0,"BASE":1}`
+* Template selon votre modèle (attention c'est en une seule ligne) : 
+    * Standard :   
+    ```{"NAME":"Sonoff ZbBridge","GPIO":[56,165,0,166,215,0,0,0,6,158,5,0,17],"FLAG":0,"BASE":75}```
+    * Pro :  
+    ```{"NAME":"Sonoff Zigbee Pro","GPIO":[0,0,576,0,480,0,0,0,0,1,1,5792,0,0,0,3552,0,320,5793,3584,0,640,608,32,0,0,0,0,0,1,0,0,0,0,0,0],"FLAG":0,"BASE":1}```
 * Cochez bien la case `Activate` sous le template
 * "Web Admin Password" : Perso, je n'en met pas car ma domotique est sur un réseau/VLAN très restreint coupé du monde et de mon réseau perso mais je conseille de mettre un mdp qui sera requis lors de la connexion à l'interface Web (attention car en cas de perte, un flash sera nécessaire).
 * "HTTP API enable" : `Décoché` (car non traité dans ce tuto)
@@ -417,7 +415,7 @@ Après quelques secondes voir une minute, dans votre onglet `Console` (où vous 
 19:27:04.331 FLH: Verification of HEX file OK
 ```
 
-Si la vérification n'est pas bonne c'est que la version du fichier n'est pas bonne et ce n'est pas utile d'allez plus loin dans le tuto !  
+Si la vérification n'est pas OK c'est que la version du fichier n'est pas bonne et ce n'est pas utile d'allez plus loin dans le tuto !  
 Vérifiez plutôt sur cette page si une version plus récente du fichier .hex est disponible : [SonOff_cc2652](https://github.com/arendst/Tasmota/tree/development/tools/fw_SonoffZigbeeBridgePro_cc2652) et relancez la procédure avec ce nouveau fichier (supprimez l'ancien, uploadez le nouveau et relancez les commandes en adaptant le nom du fichier bien entendu).
 
 Si et seulement si tout est OK, vous pouvez lancer la compilation qui prend environ 8 minutes :
