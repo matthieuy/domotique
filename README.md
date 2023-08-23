@@ -53,9 +53,11 @@ Soyez indulgent, ce tuto est vraiment posé à l'arrache avec des vérifications
     * [Telegraf](#telegraf)
         * [Installation](#installation-de-telegraf)
         * [Configuration](#configuration-de-telegraf)
-    * [Grafana](#grafana)
+    * [Grafana (mise en place)](#grafana-mise-en-place)
         * [Installation](#installation-de-grafana)
         * [Configuration](#configuration-de-grafana)
+    * [Grafana (utilisation)](#grafana-utilisation)
+        * [Création d'un dashboard](#création-dun-dashboard)
 ----
 
 
@@ -360,7 +362,7 @@ Voici les modifications à faire dans le menu "`Configuration`" => "`Configurati
 
 Quelques explications quand même :  
 Tasmota (le firmware) gère un paquet d'équipement (toujours basé sur ces fameux micro-composants ESP-32 ou ESP-8266), nous venons de lui expliquer via le template à quoi sert chaque broche de ce composant (par exemple : sur des prises connectées il peut comprendre le bouton physique on/off, sur des ampoules la broche qui réglera le niveau de luminosité,...).
-Dans le cadre de note bridge, nous pouvons même gérer les 2 leds présentes sur le boitier mais il n'y a clairement aucun intérêt.
+Dans le cadre de notre bridge, nous pouvons même gérer les 2 leds présentes sur le boitier mais il n'y a clairement aucun intérêt.
 
 
 ## Installation des drivers (pour la version pro uniquement)
@@ -906,11 +908,12 @@ Une fois de plus, vous pouvez vérifier sur l'interface web d'InfluxDB (mais apr
 Dans mon cas, nous voyons bien qu'il y a des valeurs remontées par la sonde de la cuisine (pas besoin d'aller plus loin, c'est que tout fonctionne et les autres valeurs remonteront petit à petit).
 
 
-### Grafana
+### Grafana (mise en place)
 
 Nous attaquons la grosse partie où nous allons enfin pouvoir générer des graphs.  
 La version installée lors de l'écriture de ces lignes est la v10.0.3.
 
+J'annonce, je maitrise très mal grafana mais mes connaissances sont suffisantes pour l'utilisation que j'en ai.
 
 #### Installation de Grafana
 
@@ -959,11 +962,96 @@ Recommencez pour la 2ème (flux) avec les informations suivantes :
 * Default : `Décoché`
 * Query Language : `Flux`
 * URL : `http://127.0.0.1:8086`
+* Basic Auth : `Décoché`
 * Organization : `domotique`
 * Token : `Le token du compte influxDB domotique_ro`
 * Default bucket : `domotique`
 
 <img src="img/grafana-datasource-influxdb2.png" alt="Configuration Flux" height="800" />
+
+
+
+### Grafana (utilisation)
+
+Nous allons commencer par créer un nouveau dashboard. Un dashboard est une page qui contient un ensemble de graph.  
+Nous pouvons par exemple en avoir un pour la domotique (avec les graphs de températures, humidité,...) puis un autre pour la surveillance du raspberry (avec les graphs sur la RAM, CPU, l'espace disque,...).
+
+Une fois notre dashboard "domotique" fait, nous allons commencer à rajouter des graphs dedans.
+
+
+#### Création d'un dashboard
+
+C'est assez simple :
+* Menu home ((en haut à gauche) => Dashboards
+* Cliquez sur le bouton bleu à droite "New" => "New dashboard"
+* Une fois sur le nouveau dashboard, cliquez sur la disquette en haut pour le sauvegarder sous le nom "Domotique"
+
+Pensez bien à sauvegarder votre dashboard après chaque modification. Il vous sera demandé une "note/détail" à chaque fois, celle-ci permet de savoir les modifications faites et permet de revenir en arrière via l'historique. Voici quelques exemples de note : "Ajout d'un graph de température", "Redimensionnement des graphs des sondes",...
+
+
+#### Création du premier graph
+
+C'est parti, vous pouvez cliquez sur "+ Add visualization" et sélectionner la source "InfluxDB" (celle par défaut). Vous arrivez sur la page pour créer votre graph, cette dernière mérite quelques explications.
+
+Elle est divisée en 3 grandes parties :
+* La partie centrale contient le rendu de votre graph avec vos modifications en temps réel
+* En bas, c'est les requêtes qui changeront le contenu des informations de votre graph
+* A droite, c'est la configuration du graph qui changera son apparence
+
+Tout en haut de la partie droite, vous avez un menu déroulant (normalement sur "Time series" par défaut) qui permet de choisir le type de graph. Nous resterons sur "Time series" pour ce premier graph de température.
+
+Avant de mettre en forme notre graph, commençons par faire une requête pour avoir des données à grapher :
+* Sur la ligne `FROM` :
+    * sur `select measurement`, nous allons choisir `mqtt_consumer`, c'est le nom de notre module/série telegraf pour le MQTT
+* Sur la ligne `SELECT` :
+    * sur `field`, nous tapons `temp` pour filter les résultats qui peuvent être très nombreux. Dans mon cas, je sélectionne la première sonde `ZbReceived_Bureau_Temperature` qui comme son nom l'indique correspond à la température du bureau
+* Sur la ligne `GROUP BY` :
+    * sur `fill`, nous allons sélectionner `previous`, ceci permet de relier les différents points avec la valeur précédente (testez aussi `linear` mais perso je trouve ça moins bien)
+* Sur la ligne `FORMAT AS` :
+    * Nous changeons l'alias par un nom plus parlant, dans mon cas `Bureau`
+
+A ce stade, voici ce que j'ai de mon côté :  
+<img src="img/grafana-query1.png" alt="Première requête" />
+
+Vous pouvez rajouter chaque sonde sur le même graph de la manière suivante :
+* Notre 1ère requête s'appelle "A", il faut cliquer sur le bouton "Duplicate query" (dans l'entête de la requête) pour créer une requête "B" identique
+* Sur la requête "B", il suffit de modifier le field de la ligne "SELECT" et l'alias. Dans mon cas la cuisine :  
+<img src="img/grafana-query2.png" alt="2 requêtes" />
+
+Je vous laisse faire pour refaire la même chose pour chaque sonde...
+
+Passons à l'apparence de notre graph via la partie à droite. Je vous laisserai tester les différentes options selon ce que vous souhaitez (les goûts et les couleurs...).  
+Nous allons en voir que quelques unes donc voici comment je le configure avec quelques explications sur certaines options :
+* Title : `Températures`
+* Transparent background : J'ai tendance à l'activer sur chaque graph car je trouve plus jolie sur le dashboard
+* Tooltip :
+    * Tooltip mode : `All`. C'est la bulle d'info lors du survole, soit uniquement la valeur de la courbe survolé ou la totalité des valeurs
+    * Values sort order : `Descending`.
+* Legend : 
+    * Values : `Last`
+* Standard options :
+    * Unit : `Temperatures / Celsius` (vu la liste d'unité, je vous conseil de faire une recherche avec ce que vous souhaitez).
+
+Pensez à bien sauvegarder votre graph via le bouton "Save" en haut à droite.
+
+De retour sur le dashboard, vous pouvez voir le résultat et redimensionner sa taille si besoin. Voici mon graph :  
+<img src="img/grafana-first-graph.png" alt="Premier graph" />
+
+N'hésitez pas à modifier son apparence en grattant dans les options et une fois que le résultat vous plaît, je vous propose de faire le second très rapidement :
+* Sauvegardez bien votre dashboard
+* En survolant votre graph, il y a un menu en haut à droite de proposé
+* Allez sur `More` => `Duplicate`
+* Sur le menu du 2eme, cliquez sur `Edit`
+* Modifiez le titre en  `Humidité`
+* Modifiez chaque field de la ligne "SELECT" par son correspondant "Humidity". Par exemple : `ZbReceived_Bureau_Temperature` => `ZbReceived_Bureau_Humidity`
+* Modifiez l'unité (dans la partie de droite pour remplacer "Celsius" par "Percent 0-100")
+* Sauvegardez
+
+Vous voilà avec 2 graphs, vous pouvez les redimensionner pour qu'ils prennent la largeur complète (perso j'ai mis les 2 côte à côté à 50% de largeur).  
+D'ailleurs travaillez toujours en fenêtre à 100% sur Grafana (pas besoin du plein écran non plus), il s'adaptera mieux par la suite sur mobile ou si la fenêtre est réduite.
+
+Voici mon dashboard avec les 2 graphs sur la même ligne :  
+<img src="img/grafana-2graph.png" alt="Dashboard" />
 
 
 
@@ -990,10 +1078,12 @@ Recommencez pour la 2ème (flux) avec les informations suivantes :
         * [X] Installation
         * [X] Configuration
         * [ ] Graph :
-            * [ ] Création d'un dashboard
-            * [ ] Premier graph avec les températures :
-                * [ ] Configuration du graph
-                * [ ] Les requêtes
+            * [X] Création d'un dashboard
+            * [X] Premier graph avec les températures :
+                * [X] Configuration du graph
+                * [X] Les requêtes
+            * [ ] Graph de jauge
+            * [ ] Row
 * [ ] Plus loin :
     * [ ] Prise wattmetre connectée :
         * [ ] Calibrage wattmetre
