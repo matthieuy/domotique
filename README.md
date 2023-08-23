@@ -810,7 +810,7 @@ influx v1 auth create --username domotique_ro -o domotique --token <TOKEN_ADMIN>
 Bien entendu, remplacez les variables suivantes dans cette commande :
 * `<TOKEN_ADMIN>` : par le 1er token admin car c'est le seul qui a les droits pour gérer les créations de compte
 * `<ID_BUCKET>` : par l'ID du bucket domotique récupéré juste avant (pour donner les droits de lecture à ce compte)  
-Un mot de passe est demandé pour ce compte "legacy" (utilisez un générateur et noté le bien).
+Un mot de passe est demandé pour ce compte "legacy" (utilisez un générateur et noté le bien ou utilisez le même que le compte MQTT en lecture seule).
 
 
 ### Telegraf
@@ -933,10 +933,39 @@ Le login/mdp par défaut est `admin`/`admin` et avant même la première connexi
 #### Configuration de Grafana
 
 Nous allons commencer par configurer 2 bases de données en source. Pourquoi 2 alors que nous avons qu'une base de donnée ?
-* Notre base de donnée avec le compte legacy car plus simple pour débuter.
+* Notre base de donnée InfluxDB avec le compte legacy car plus simple pour débuter sous Grafana.
 * La même base de donnée mais avec "Flux" un langage beaucoup plus puissant mais complexe.
 
 Ceci va nous permettre de gérer/grapher les mêmes données mais de manière différente.
+
+Dans le menu home (tout en haut à gauche), allez dans "`Connections`" puis "`Data sources`" :  
+<img src="img/grafana-datasource-menu.png" alt="Menu Grafana" height="400" />
+
+Rajoutez la 1er base influxDB (legacy) avec les informations suivantes :
+* Name : `InfluxDB`
+* Default : `Coché`
+* Query Language : `InfluxQL`
+* URL : `http://127.0.0.1:8086`
+* Database : `domotique`
+* User : `domotique_ro`
+* Password : `Le mot de passe (pas le token) du compte influxDB domotique_ro`
+* HTTP Method : `POST`
+
+<img src="img/grafana-datasource-influxdb.png" alt="Configuration" height="800" />
+
+
+Recommencez pour la 2ème (flux) avec les informations suivantes :
+* Name : `InfluxDB v2 (Flux)`
+* Default : `Décoché`
+* Query Language : `Flux`
+* URL : `http://127.0.0.1:8086`
+* Organization : `domotique`
+* Token : `Le token du compte influxDB domotique_ro`
+* Default bucket : `domotique`
+
+<img src="img/grafana-datasource-influxdb2.png" alt="Configuration Flux" height="800" />
+
+
 
 **Rédaction de la suite en cours...**
 
@@ -954,13 +983,17 @@ Ceci va nous permettre de gérer/grapher les mêmes données mais de manière di
     * [X] Telegraf :
         * [X] Installation
         * [X] Configuration avec un token RO
-    * [ ] InfluxDB :
+    * [X] InfluxDB :
         * [X] Installation
-        * [ ] Configuration (en cours: pas fini car il manque des infos)
+        * [X] Configuration
     * [ ] Grafana :
         * [X] Installation
-        * [ ] Configuration (en cours de rédaction/vérification)
-        * [ ] Graph
+        * [X] Configuration
+        * [ ] Graph :
+            * [ ] Création d'un dashboard
+            * [ ] Premier graph avec les températures :
+                * [ ] Configuration du graph
+                * [ ] Les requêtes
 * [ ] Plus loin :
     * [ ] Prise wattmetre connectée :
         * [ ] Calibrage wattmetre
@@ -971,7 +1004,7 @@ Ceci va nous permettre de gérer/grapher les mêmes données mais de manière di
     * [ ] Node-Red
     * [ ] Domoticz
     * [ ] Sécurité :
-        * [ ] Tasmota : TLS pas possible
+        * [ ] Tasmota : TLS (pas possible)
         * [ ] MQTT over TLS
             * [ ] Configuration mosquitto
             * [ ] Vérification MQTT-Explorer
@@ -992,8 +1025,3 @@ Ceci va nous permettre de gérer/grapher les mêmes données mais de manière di
         * [ ] Standard
         * [ ] Pro
     * [ ] Refaire sommaire après splittage
-
-<!--
-influx v1 auth create --username domotique_ro --o domotique --token XXXXX --read-bucket e98fe197dec38b6a
-
--->
