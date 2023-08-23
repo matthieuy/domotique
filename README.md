@@ -58,6 +58,7 @@ Soyez indulgent, ce tuto est vraiment posé à l'arrache avec des vérifications
         * [Configuration](#configuration-de-grafana)
     * [Grafana (utilisation)](#grafana-utilisation)
         * [Création d'un dashboard](#création-dun-dashboard)
+        * [Création du premier graph](#création-du-premier-graph)
 ----
 
 
