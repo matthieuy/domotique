@@ -1023,13 +1023,13 @@ Je vous laisse faire pour refaire la même chose pour chaque sonde...
 
 Passons à l'apparence de notre graph via la partie à droite. Je vous laisserai tester les différentes options selon ce que vous souhaitez (les goûts et les couleurs...).  
 Nous allons en voir que quelques unes donc voici comment je le configure avec quelques explications sur certaines options :
-* Title : `Températures`
-* Transparent background : J'ai tendance à l'activer sur chaque graph car je trouve plus jolie sur le dashboard
+* Title : `Températures` (ça sera le titre affiché en haut de votre graph)
+* Transparent background : J'ai tendance à l'activer sur chaque graph car je trouve plus jolie sur le dashboard (testez avec et sans).
 * Tooltip :
-    * Tooltip mode : `All`. C'est la bulle d'info lors du survole, soit uniquement la valeur de la courbe survolé ou la totalité des valeurs
-    * Values sort order : `Descending`.
+    * Tooltip mode : `All`. C'est la bulle d'info lors du survole, soit uniquement la valeur de la courbe survolé ou la totalité des valeurssur le même axe de temps (perso j'aime bien pouvoir comparer à un instant T)
+    * Values sort order : `Descending` (idem, je trouve plus lisible de savoir où c'est le plus chaud en classant les valeurs dans cette bulle d'info).
 * Legend : 
-    * Values : `Last`
+    * Values : `Last` cela rajoute dans la légende la dernière valeur relevée, si vous rajoutez plusieurs valeurs je conseil de passer en `mode=table` voir le placement à droite (voir plus bas un exemple de rendu)
 * Standard options :
     * Unit : `Temperatures / Celsius` (vu la liste d'unité, je vous conseil de faire une recherche avec ce que vous souhaitez).
 
@@ -1038,9 +1038,13 @@ Pensez à bien sauvegarder votre graph via le bouton "Save" en haut à droite.
 De retour sur le dashboard, vous pouvez voir le résultat et redimensionner sa taille si besoin. Voici mon graph :  
 <img src="img/grafana-first-graph.png" alt="Premier graph" />
 
-N'hésitez pas à modifier son apparence en grattant dans les options et une fois que le résultat vous plaît, je vous propose de faire le second très rapidement :
+Un exemple de légende avec le `mode=table`, affichage à droite et les valeurs `last` + `max` :  
+<img src="img/grafana-legend-max.png" alt="Legende à droite en tableau" />
+
+
+N'hésitez pas à modifier l'apparence de votre graph en grattant dans les options et une fois que le résultat vous plaît, je vous propose de faire le second très rapidement :
 * Sauvegardez bien votre dashboard
-* En survolant votre graph, il y a un menu en haut à droite de proposé
+* En survolant votre graph sur le dashboard, il y a un menu en haut à droite de proposé
 * Allez sur `More` => `Duplicate`
 * Sur le menu du 2eme, cliquez sur `Edit`
 * Modifiez le titre en  `Humidité`
