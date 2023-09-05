@@ -1073,15 +1073,7 @@ Voici mon dashboard avec les 2 graphs sur la même ligne :
 
 
 * [ ] Graph :
-    * [X] Telegraf :
-        * [X] Installation
-        * [X] Configuration avec un token RO
-    * [X] InfluxDB :
-        * [X] Installation
-        * [X] Configuration
     * [ ] Grafana :
-        * [X] Installation
-        * [X] Configuration
         * [ ] Graph :
             * [X] Création d'un dashboard
             * [X] Premier graph avec les températures :
