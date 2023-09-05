@@ -76,11 +76,11 @@ Un accès internet est également nécessaire (uniquement pour l'installation et
 
 ### Nano-ordinateur (Raspberry PI ?)
 
-Il faut un raspberry PI ou un autre nano-ordinateur sous Linux (vu la pénurie, n'importe quel nano-ordinateur peut faire l'affaire : orangePI, BananaPI, ODroid, Tinker, Olimex,...).  
+Il faut un raspberry PI ou un autre nano-ordinateur sous Linux (vu la pénurie de RaspberryPI, n'importe quel nano-ordinateur peut faire l'affaire : orangePI, BananaPI, ODroid, Tinker, Olimex,...).  
 Il est possible d'utiliser un PC ou un serveur local mais ce dernier doit être sous Linux et allumé H24.
 Il est également faisable d'utiliser un serveur sur le net (OVH, scaleway,...) mais attention à la sécurité (très peu abordée dans ce tuto). Dans ce tuto, la domotique sera uniquement disponible en locale sans aucun flux depuis ou vers le net (hormis les mises à jour).  
 
-Dans ce tuto, j'utilise un Raspberry PI 3 B sous la distribution officielle Raspbian (Debian).  
+Dans ce tuto, j'utilise un Raspberry PI 3B sous la distribution officielle Raspbian (Debian).  
 A vous d'adapter si vous partez sur des configurations différentes.  
 Je vais essayer d'éviter mais il est possible, par habitude, que vous voyez noté "RPi". C'est ma notation courte pour "Raspberry PI"
 
@@ -134,11 +134,12 @@ Voici le boitier (le format et les dimensions sont identiques pour la version st
 ### Divers pré-requis
 
 Il y a d'autres achats à prévoir :  
-* Des piles "montre" de rechange : des CR2450 (perso je commande des plaquettes de 10 piles).
+* Des piles "montre" de rechange pour les sondes : des CR2450 (perso je commande des plaquettes de 10 piles).
 * Une alimentation microUSB pour le bridge (5V 1A), en général un vieux chargeur de téléphone suffit (le bridge est fourni avec un câble microUSB mais pas l'alimentation).
-* Une clé FTDI (c'est un adaptateur USB/Serial qui permettra de flasher le bridge mais j'y reviendrai).
-* Un câble miniUSB (attention pas micro mais bien mini) pour la clé FTDI (il est possible d'acheter le câble avec la clé).
-* Câble dupont, pince croco,... pour le câblage nécessaire lors du flashage.
+* Pour le flashage (uniquement) :
+    * Une clé FTDI (c'est un adaptateur USB/Serial qui permettra de flasher le bridge mais j'y reviendrai).
+    * Un câble miniUSB (attention pas micro mais bien mini) pour la clé FTDI (il est possible d'acheter le câble avec la clé).
+    * Câble dupont, pince croco,... pour le câblage nécessaire lors du flashage.
 * Adhésif double-face pour le bridge (si fixé au mur).
 * Une tournée de bière pour l'auteur de ce tuto quand votre domotique fonctionnera.
 
@@ -181,8 +182,8 @@ NB : L'installation ne se fera pas dans l'ordre ci-dessus d'où ces explications
 ### Explications sur le flash
 
 
-Comme vu dans les pré-requis, le fonctionnement de base du boitier SonOff est prévu pour être utilisé via une application android/iphone en passant par internet et surtout le cloud AWS (c'est le mode de fonctionnement pour les noobs).  
-En faite le matériel Sonoff (ça concerne aussi les prises connectés, les interrupteurs, ...) sont basés sur un micro-controlleur nommé ESP8266 (pour la version standard) ou ESP-32 (pour la version pro) très connu des bidouilleurs DIY : c'est un arduino sous stéroïde car équipé de Wifi (voir du bluetooth pour le ESP-32) pour environ 5€/pièce.  
+Comme vu dans les pré-requis, le fonctionnement de base du bridge SonOff est prévu pour être utilisé via une application android/iphone en passant par internet et surtout le cloud AWS (c'est le mode de fonctionnement pour les noobs).  
+En faite le matériel Sonoff (ça concerne aussi les prises connectés, les interrupteurs, ...) sont basés sur un micro-controlleur nommé ESP8266 (pour la version standard) ou ESP-32 (pour la version pro) très connu des bidouilleurs DIY (Do It Yourself) : c'est un arduino sous stéroïde car équipé de Wifi (voir du bluetooth pour le ESP-32) pour environ 5€/pièce.  
 Il est donc possible de flasher complètement ce composant de manière relativement simple.
 
 C'est ce que nous allons faire pour le remplacer par le firmware open-source [Tasmota](https://tasmota.github.io/docs/).
@@ -205,7 +206,9 @@ Le but étant de pouvoir le connecter à la clé USB FTDI suivante :
 
 <img src="img/ftdi.jpg" alt="Clé FTDI" height="150"/>
 
-Pour ceux qui connaissent un peu le système, c'est un adaptateur de type USB/serial. Vous pouvez trouver cette clé sur [AliExpress](https://fr.aliexpress.com/item/2019244368.html) pour environ 1,5€ (sans le cable miniUSB).  
+Pour ceux qui connaissent un peu le système, c'est un adaptateur de type USB/serial. Vous pouvez trouver cette clé sur [AliExpress](https://fr.aliexpress.com/item/2019244368.html) pour environ 1,5€ (sans le cable miniUSB).
+
+Une fois la clé FTDI en main, pensez à bien vérifier que le cavalier (ou jumper) bref le petit truc noir vers les connectiques sur la clé est du côté alimentation 3.3V et non 5V (donc l'inverse de l'illustration ci-dessus).
 
 
 **Attention** : 
@@ -315,6 +318,7 @@ En faite nous avons installé une version de base (factory), il reste plusieurs 
 . Connectez votre PC ou mobile sur ce hotspot.
 * Rendez-vous via votre navigateur sur l'adresse suivante : [http://192.168.4.1](http://192.168.4.1) (NB : selon votre réseau, votre navigateur, OS,... il est possible que vous soyez directement redirigé sur cette adresse).
 * Vous arrivez sur la page de configuration du Wifi.
+* Renseignez les informations de connexion de votre WiFi.
 * Cliquez sur "`Save`"
 
 <img src="img/tasmota-hotspot-wifi.png" alt="Configuration du wifi" height="550" />
@@ -325,7 +329,7 @@ Selon les navigateurs, OS, votre config réseau... vous êtes soit redirigé sur
 **Attention** : Le hotspot tasmota est actif que 3 minutes pour des raisons de sécurité, si vous loupez cette fenêtre de tir, il faut couper l'alimentation du boitier pendant 5 secondes et la rebrancher.
 
 
-Pour la version standard uniquement : Si votre bridge est connecté à votre wifi et que vous avez accés à son interface Web via son IP, vous pouvez dès maintenant refermer le boitier (pensez à mettre du scotch si nécessaire sur chaque fils dénudé dedans utilisés lors du flash) et vous pouvez mettre le bridge à sa place définitive avec son alimentation microUSB. Nous ferons tout le reste via l'interface Web.  
+Pour la version standard (uniquement et pas pour la pro) : Si votre bridge est connecté à votre wifi et que vous avez accés à son interface Web via son IP, vous pouvez dès maintenant refermer le boitier (pensez à mettre du scotch si nécessaire sur chaque fils dénudé dedans utilisés lors du flash) et vous pouvez mettre le bridge à sa place définitive avec son alimentation microUSB. Nous ferons tout le reste via l'interface Web.  
 
 Scotch sur la partie dénudée du câble :  
 <img src="img/sonoff-scotch.jpg" alt="Scotch sur la board" width="300" />
@@ -362,7 +366,7 @@ Voici les modifications à faire dans le menu "`Configuration`" => "`Configurati
 * "Emulation" : `None`
 
 Quelques explications quand même :  
-Tasmota (le firmware) gère un paquet d'équipement (toujours basé sur ces fameux micro-composants ESP-32 ou ESP-8266), nous venons de lui expliquer via le template à quoi sert chaque broche de ce composant (par exemple : sur des prises connectées il peut comprendre le bouton physique on/off, sur des ampoules la broche qui réglera le niveau de luminosité,...).
+Tasmota (le firmware) gère un paquet d'équipement (toujours basé sur ces fameux micro-composants ESP), nous venons de lui expliquer via le template à quoi sert chaque broche de ce composant (par exemple : sur des prises connectées il peut comprendre le bouton physique on/off, sur des ampoules la broche qui réglera le niveau de luminosité,...).
 Dans le cadre de notre bridge, nous pouvons même gérer les 2 leds présentes sur le boitier mais il n'y a clairement aucun intérêt.
 
 
@@ -557,7 +561,7 @@ A ce stade de l'installation, vous pouvez déjà faire un backup (étape que je 
 * Menu "`Configuration`"
     * "`Backup Configuration`"
 
-NB : Les backups contiennent que la configuration Tasmota mais pas du tout l'image du firmware,... Ils permettrons de retrouver la conf opérationnelle mais pas du tout de reflasher avec le backup. Il faut voir ça comme un backup de votre dossier personnel sous Windows. En cas de crash de l'OS/firmware, il vous permettra de retrouver la configuration de votre OS mais ne remplacera pas la ré-installation/flashage de l'OS/firmware.
+NB : Les backups contiennent que la configuration Tasmota mais pas du tout l'image du firmware,... Ils permettront de retrouver la conf opérationnelle mais pas du tout de reflasher avec le backup. Il faut voir ça comme un backup de votre dossier personnel sous Windows. En cas de crash de l'OS/firmware, il vous permettra de retrouver la configuration de votre OS mais ne remplacera pas la ré-installation/flashage de l'OS/firmware.
 
 J'en profite pour placer le fait qu'**il ne faut surtout pas** utiliser le menu "`Firmware Upgrade`" pour le moment, nous verrons plus tard car il n'est pas toujours configuré correctement pour les SonOff ZBbridge dans l'état.
 
@@ -571,8 +575,8 @@ Avant d'attaquer, j'ai quelques recommandations suite à de mauvaises aventures 
 Je recommande **fortement** (et dans cet ordre) :
 * Ajoutez une sonde à la fois, attendez d'avoir tout configurer avant de passer à la suivante.
 * Notez la correspondance du nom de la sonde (genre : Salon) et son adresse (un truc similaire à une adresse MAC mais au format 0xF5F8) dans un fichier txt ou sur une feuille (pour ceux qui ont encore des stylos chez eux).
-* Faites un backup tasmota du bridge entre chaque ajout (avec un nom clair et daté du fichier pour un éventuel retour arrière).
-* Optionnel mais perso j'ai rajouté l'adresse sur une étiquette derrière chaque sonde.
+* Faites un backup tasmota du bridge entre chaque ajout (avec un nom clair et daté du fichier pour un éventuel retour arrière. Ex : domotique-20230905-15h35-ajoutSalon.bak).
+* Optionnel mais perso j'ai rajouté l'adresse MAC sur une étiquette derrière chaque sonde.
 
 Vous voilà informez et ne pleurez pas si vous avec 10 adresses MAC (sondes) sans savoir à quoi ça correspond sans souffler comme un con dessus pour les identifier ^^ (oui véridique j'ai fait ça la 1ère fois car je ne savais pas encore renommer les sondes et mes branches MQTT étaient foireuses).
 
@@ -675,7 +679,7 @@ Dans la console, lancez la commande suivante selon votre modèle :
 * ZbBridge pro : `OtaUrl https://ota.tasmota.com/tasmota32/release/tasmota32-zbbrdgpro.bin`
 
 Maintenant vous pouvez lancer une mise à jour (si une nouvelle version est disponible) via le menu principale dans "`Firmware Upgrade`" puis "`Start upgrade`" (celui du haut).   
-Ceci nécessite que le bridge dispose d'une connexion internet. Si comme moi vous l'avez coupé du net (via des règles de firewall), vous pouvez télécharger le firmware via le lien ci-dessus (toujours selon votre version) et uploader le fichier sur le bridge.
+Ceci nécessite que le bridge dispose d'une connexion internet. Si comme moi, vous l'avez coupé du net (via des règles de firewall), vous pouvez télécharger le firmware via le lien ci-dessus (toujours selon votre version) et uploader le fichier sur le bridge.
 
 
 ## Grapher votre domotique
@@ -703,8 +707,8 @@ Je n'aborderai pas ce sujet dans ce tuto mais il est possible d'avoir les graphs
 * Je conseil de garder le serveur MQTT et le collecteur en local sur la même machine (le raspberry PI) pour plusieurs raisons :
     * En cas de coupure Internet, le collecteur est capable de mettre en cache les infos et tout ré-envoyer à la base de donnée quand la connexion remonte (dans une certaine limite de donnée/durée bien entendu).
     * Niveau performance, c'est mieux (même si nous ne sommes pas sur des outils qui consomment énormément d'un point de vue bande passante ou qui ont besoin d'une latence très faible), il est préférable d'avoir le collecteur d'information au même endroit que le MQTT qui contient les dites infos.
-    * A ce stade du tuto, les flux ne sont pas chiffrés (grand débat de savoir si la température de mon salon est une donnée sensible cependant la connexion à la BDD sera en claire dans un premier temps donc non sécurisée).
-* Il est très fortement conseillé de monter un tunnel chiffré entre votre domotique et l'instance influxDB si elles ne sont pas au même endroit (avec `WireGuard` ou `OpenVPN` par exemple).
+    * A ce stade du tuto, les flux ne sont pas chiffrés (grand débat de savoir si la température de mon salon est une donnée sensible cependant la connexion à la BDD sera en claire dans un premier temps donc clairement non sécurisée).
+* Il est très fortement conseillé de monter un tunnel chiffré entre votre domotique et l'instance influxDB si elle n'est pas au même endroit (avec `WireGuard` ou `OpenVPN` par exemple).
 * Il faut restreindre les accès à votre BDD InfluxDB uniquement à votre domotique (via l'interface du tunnel par exemple et/ou une IP fixe).
 * De manière générale, utilisez des mots de passes complexes avec un gestionnaire de mot de passe comme BitWarden ou KeePass.
 
